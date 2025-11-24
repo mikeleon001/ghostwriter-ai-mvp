@@ -1,228 +1,173 @@
-// Analyzer.java - Text Analysis and Topic Extraction
+// Analyzer.java - REFACTORED WITH STRATEGY PATTERN
 
 package com.ghostwriter.analysis;
 
-import com.ghostwriter.message.*;
+import com.ghostwriter.message.Conversation;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * Analyzer class handles conversation analysis
- * Extracts key topics, identifies action items, calculates statistics
+ * Analyzer class - Context for Strategy Pattern
+ * Coordinates multiple analysis strategies to produce comprehensive results
+ * 
+ * Design Pattern: Strategy (Context)
+ * Purpose: Allows flexible composition of analysis algorithms at runtime
+ * 
+ * Instead of doing all analysis itself, Analyzer delegates to strategy objects.
+ * This makes it easy to:
+ * - Add new analysis types without modifying Analyzer
+ * - Test each analysis type independently
+ * - Select which analyses to run dynamically
  */
 public class Analyzer {
     
-    // Common words to ignore in topic extraction
-    private static final Set<String> STOP_WORDS = new HashSet<>(Arrays.asList(
-        "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-        "of", "with", "by", "from", "up", "about", "into", "through", "during",
-        "is", "am", "are", "was", "were", "be", "been", "being", "have", "has",
-        "had", "do", "does", "did", "will", "would", "should", "could", "may",
-        "might", "must", "can", "i", "you", "he", "she", "it", "we", "they",
-        "me", "him", "her", "us", "them", "my", "your", "his", "its", "our",
-        "this", "that", "these", "those", "what", "which", "who", "when",
-        "where", "why", "how", "all", "each", "every", "both", "few", "more",
-        "most", "some", "such", "no", "not", "only", "own", "same", "so",
-        "than", "too", "very", "just", "yeah", "ok", "okay", "yes", "no"
-    ));
-    
-    // Keywords that indicate action items
-    private static final Set<String> ACTION_KEYWORDS = new HashSet<>(Arrays.asList(
-        "need", "should", "must", "have to", "got to", "remember", "don't forget",
-        "make sure", "please", "can you", "could you", "will you", "would you",
-        "let's", "we should", "i'll", "i will", "deadline", "by", "before",
-        "send", "email", "call", "meet", "schedule", "remind"
-    ));
+    // List of strategies to apply
+    private List<AnalysisStrategy> strategies;
     
     /**
-     * Analyze conversation and extract insights
+     * Constructor with default strategies
+     * Creates analyzer with all standard analysis strategies
+     */
+    public Analyzer() {
+        this.strategies = new ArrayList<>();
+        // Add default strategies
+        addStrategy(new TopicExtractionStrategy());
+        addStrategy(new ActionItemStrategy());
+        addStrategy(new QuestionDetectionStrategy());
+        addStrategy(new StatisticsStrategy());
+    }
+    
+    /**
+     * Constructor with custom strategies
+     * Allows client to specify which strategies to use
+     * 
+     * @param strategies List of analysis strategies
+     */
+    public Analyzer(List<AnalysisStrategy> strategies) {
+        this.strategies = new ArrayList<>(strategies);
+    }
+    
+    /**
+     * Add a strategy to the analyzer
+     * Allows runtime composition of strategies
+     * 
+     * @param strategy Strategy to add
+     */
+    public void addStrategy(AnalysisStrategy strategy) {
+        if (strategy != null) {
+            this.strategies.add(strategy);
+        }
+    }
+    
+    /**
+     * Set strategies (replaces all existing strategies)
+     * 
+     * @param strategies New list of strategies
+     */
+    public void setStrategies(List<AnalysisStrategy> strategies) {
+        this.strategies = new ArrayList<>(strategies);
+    }
+    
+    /**
+     * Get current strategies
+     * 
+     * @return List of active strategies
+     */
+    public List<AnalysisStrategy> getStrategies() {
+        return new ArrayList<>(strategies);
+    }
+    
+    /**
+     * Analyze conversation using all configured strategies
+     * 
+     * STRATEGY PATTERN IN ACTION:
+     * Instead of doing analysis itself, Analyzer delegates to each strategy
+     * and aggregates the results
      * 
      * @param conversation Conversation to analyze
-     * @return AnalysisResult with topics, action items, statistics
+     * @return Comprehensive AnalysisResult combining all strategy results
      */
     public AnalysisResult analyzeConversation(Conversation conversation) {
         
-        List<Message> messages = conversation.getMessages();
+        if (conversation == null) {
+            throw new IllegalArgumentException("Conversation cannot be null");
+        }
         
-        if (messages == null || messages.isEmpty()) {
+        if (conversation.getMessages() == null || conversation.getMessages().isEmpty()) {
             throw new IllegalArgumentException("Cannot analyze empty conversation");
         }
         
-        System.out.println("🔍 Analyzing " + messages.size() + " messages...");
+        System.out.println("\n🔍 Analyzing conversation with " + strategies.size() + " strategies...");
+        System.out.println("   Total messages: " + conversation.getMessages().size());
         
-        // Extract key topics
-        List<String> topics = extractKeyTopics(messages);
+        // Collect results from all strategies
+        List<String> allTopics = new ArrayList<>();
+        List<String> allActionItems = new ArrayList<>();
+        List<String> allQuestions = new ArrayList<>();
+        Map<String, Object> allStatistics = new HashMap<>();
         
-        // Identify action items
-        List<String> actionItems = identifyActionItems(messages);
-        
-        // Find pending questions
-        List<String> questions = findPendingQuestions(messages);
-        
-        // Calculate statistics
-        Map<String, Object> statistics = calculateStatistics(conversation);
-        
-        System.out.println("✅ Analysis complete!");
-        System.out.println("   Topics found: " + topics.size());
-        System.out.println("   Action items: " + actionItems.size());
-        System.out.println("   Questions: " + questions.size());
-        
-        return new AnalysisResult(topics, actionItems, questions, statistics);
-    }
-    
-    /**
-     * Extract key topics from messages using word frequency analysis
-     * 
-     * @param messages List of messages
-     * @return List of key topics (top 5)
-     */
-    public List<String> extractKeyTopics(List<Message> messages) {
-        
-        // Count word frequencies
-        Map<String, Integer> wordFrequency = new HashMap<>();
-        
-        for (Message message : messages) {
-            String content = message.getContent().toLowerCase();
+        // Execute each strategy
+        for (AnalysisStrategy strategy : strategies) {
+            System.out.println("\n   Running: " + strategy.getStrategyName());
             
-            // Remove punctuation and split into words
-            String[] words = content.replaceAll("[^a-zA-Z0-9\\s]", "").split("\\s+");
+            AnalysisResult partialResult = strategy.analyze(conversation);
             
-            for (String word : words) {
-                word = word.trim();
-                
-                // Skip short words and stop words
-                if (word.length() < 3 || STOP_WORDS.contains(word)) {
-                    continue;
-                }
-                
-                wordFrequency.put(word, wordFrequency.getOrDefault(word, 0) + 1);
+            // Merge results
+            if (partialResult.getTopics() != null && !partialResult.getTopics().isEmpty()) {
+                allTopics.addAll(partialResult.getTopics());
+            }
+            
+            if (partialResult.getActionItems() != null && !partialResult.getActionItems().isEmpty()) {
+                allActionItems.addAll(partialResult.getActionItems());
+            }
+            
+            if (partialResult.getQuestions() != null && !partialResult.getQuestions().isEmpty()) {
+                allQuestions.addAll(partialResult.getQuestions());
+            }
+            
+            if (partialResult.getStatistics() != null && !partialResult.getStatistics().isEmpty()) {
+                allStatistics.putAll(partialResult.getStatistics());
             }
         }
         
-        // Sort by frequency and get top topics
-        List<Map.Entry<String, Integer>> sortedWords = new ArrayList<>(wordFrequency.entrySet());
-        sortedWords.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+        // Create comprehensive result
+        AnalysisResult finalResult = new AnalysisResult(
+            allTopics, 
+            allActionItems, 
+            allQuestions, 
+            allStatistics
+        );
         
-        // Get top 5 topics with frequency > 1
-        List<String> topics = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : sortedWords) {
-            if (entry.getValue() > 1 && topics.size() < 5) {
-                topics.add(entry.getKey() + " (mentioned " + entry.getValue() + " times)");
-            }
-        }
+        System.out.println("\n✅ Analysis complete!");
+        System.out.println("   Topics found: " + allTopics.size());
+        System.out.println("   Action items: " + allActionItems.size());
+        System.out.println("   Questions: " + allQuestions.size());
+        System.out.println("   Statistics: " + allStatistics.size() + " metrics\n");
         
-        return topics;
+        return finalResult;
     }
     
     /**
-     * Identify action items from messages
-     * Looks for sentences with action keywords
+     * Convenience method: Analyze with specific strategies
+     * Allows one-time analysis with custom strategies without modifying the analyzer
      * 
-     * @param messages List of messages
-     * @return List of action items
+     * @param conversation Conversation to analyze
+     * @param customStrategies Strategies to use for this analysis only
+     * @return AnalysisResult
      */
-    public List<String> identifyActionItems(List<Message> messages) {
+    public AnalysisResult analyzeWith(Conversation conversation, AnalysisStrategy... customStrategies) {
+        // Save current strategies
+        List<AnalysisStrategy> savedStrategies = new ArrayList<>(this.strategies);
         
-        List<String> actionItems = new ArrayList<>();
+        // Temporarily replace with custom strategies
+        this.strategies = Arrays.asList(customStrategies);
         
-        for (Message message : messages) {
-            String content = message.getContent();
-            
-            // Split into sentences
-            String[] sentences = content.split("[.!?]");
-            
-            for (String sentence : sentences) {
-                String lowerSentence = sentence.toLowerCase().trim();
-                
-                // Check if sentence contains action keywords
-                for (String keyword : ACTION_KEYWORDS) {
-                    if (lowerSentence.contains(keyword)) {
-                        // Clean up and add to action items
-                        String cleanSentence = sentence.trim();
-                        if (cleanSentence.length() > 10 && !actionItems.contains(cleanSentence)) {
-                            actionItems.add("\"" + cleanSentence + "\" - " + message.getSender());
-                        }
-                        break;
-                    }
-                }
-            }
-        }
+        // Perform analysis
+        AnalysisResult result = analyzeConversation(conversation);
         
-        return actionItems;
-    }
-    
-    /**
-     * Find pending questions (sentences ending with ?)
-     * 
-     * @param messages List of messages
-     * @return List of pending questions
-     */
-    public List<String> findPendingQuestions(List<Message> messages) {
+        // Restore original strategies
+        this.strategies = savedStrategies;
         
-        List<String> questions = new ArrayList<>();
-        
-        for (Message message : messages) {
-            String content = message.getContent();
-            
-            // Find sentences ending with ?
-            String[] sentences = content.split("[.!]");
-            
-            for (String sentence : sentences) {
-                if (sentence.trim().endsWith("?")) {
-                    String question = sentence.trim();
-                    if (!questions.contains(question)) {
-                        questions.add("\"" + question + "\" - " + message.getSender());
-                    }
-                }
-            }
-        }
-        
-        return questions;
-    }
-    
-    /**
-     * Calculate conversation statistics
-     * 
-     * @param conversation Conversation object
-     * @return Map of statistics
-     */
-    public Map<String, Object> calculateStatistics(Conversation conversation) {
-        
-        List<Message> messages = conversation.getMessages();
-        Map<String, Object> stats = new HashMap<>();
-        
-        // Total message count
-        stats.put("total_messages", messages.size());
-        
-        // Count messages per sender
-        Map<String, Integer> senderCounts = new HashMap<>();
-        for (Message message : messages) {
-            String sender = message.getSender();
-            senderCounts.put(sender, senderCounts.getOrDefault(sender, 0) + 1);
-        }
-        stats.put("sender_breakdown", senderCounts);
-        
-        // Find most active sender
-        String mostActive = senderCounts.entrySet().stream()
-            .max(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey)
-            .orElse("Unknown");
-        stats.put("most_active", mostActive);
-        
-        // Time range (first and last message)
-        if (!messages.isEmpty()) {
-            stats.put("first_message", messages.get(0).getTimestamp());
-            stats.put("last_message", messages.get(messages.size() - 1).getTimestamp());
-        }
-        
-        // Calculate average message length
-        double avgLength = messages.stream()
-            .mapToInt(m -> m.getContent().length())
-            .average()
-            .orElse(0);
-        stats.put("avg_message_length", Math.round(avgLength));
-        
-        return stats;
+        return result;
     }
 }
