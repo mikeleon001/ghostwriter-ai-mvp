@@ -174,7 +174,9 @@ public class User {
         for (Message message : messages) {
             conversation.addMessage(message);
         }
-        
+
+        conversation.save();
+
         System.out.println("✅ Processed " + messages.size() + " messages");
         
         return messages.size();
