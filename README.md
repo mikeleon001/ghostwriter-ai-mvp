@@ -21,6 +21,7 @@ The MVP implements the following core functionality:
 - ✅ **Intelligent Analysis** - Extract key topics, action items, and questions using AI strategies
 - ✅ **Daily Summary Generation** - Automatically create formatted summaries with statistics
 - ✅ **Database Persistence** - Store users, conversations, messages, and summaries
+- ✅ **Comprehensive Testing** - 63 unit tests with 100% pass rate covering all components
 
 ---
 
@@ -64,7 +65,7 @@ This project demonstrates **3 Gang of Four design patterns**:
 - `AnalysisStrategy.java` - Strategy interface
 - `AnalysisResult.java` - Analysis result container
 - `Summary.java` - Summary generation and formatting
-- **Tests**: `UserTest.java`, `AccountTest.java`, `AnalyzerTest.java` (18 unit tests)
+- **Tests**: `UserTest.java` (2 tests), `AccountTest.java` (2 tests), `AnalyzerTest.java` (12 tests)
 
 ### Trung Nghia Vong (25%)
 **Message Handling & Parsing**
@@ -75,9 +76,10 @@ This project demonstrates **3 Gang of Four design patterns**:
 - `MessageParserFactory.java` - Factory for creating parsers
 
 ### Jack River Morris (25%)
-**Database & Integration**
+**Database & Integration Testing**
 - `Database.java` - Singleton database layer with SQLite
 - `MVPDemo.java` - Complete integration demo application
+- **Tests**: `MessageParserTest.java` (25 tests), `ConversationTest.java` (17 tests), `AuthenticationTest.java` (5 tests)
 - **Integration Testing**: End-to-end workflow demonstration
 
 ---
@@ -119,7 +121,11 @@ ghostwriter-ai-mvp/
 │               └── ghostwriter/
 │                   ├── user/
 │                   │   ├── UserTest.java
-│                   │   └── AccountTest.java
+│                   │   ├── AccountTest.java
+│                   │   └── AuthenticationTest.java
+│                   ├── message/
+│                   │   ├── MessageParserTest.java
+│                   │   └── ConversationTest.java
 │                   └── analysis/
 │                       └── AnalyzerTest.java
 ├── docs/
@@ -215,17 +221,45 @@ Participants: Alice (5), Bob (5)
 
 ## Testing
 
-The project includes comprehensive unit tests:
+The project includes unit tests covering all major components:
 
-- **UserTest.java**: 4 tests for user registration and login
-- **AccountTest.java**: 2 tests for password hashing and verification
-- **AnalyzerTest.java**: 12 tests including:
+### Test Suite Overview
+
+- **MessageParserTest.java**: 25 tests for WhatsApp parsing
+  - Valid format parsing
+  - Multi-line messages
+  - Emojis and special characters
+  - Edge cases and error handling
+  - Timestamp conversion
+
+- **ConversationTest.java**: 17 tests for conversation persistence
+  - Conversation creation
+  - Message addition
+  - Database save/load operations
+  - Multiple conversations per user
+
+- **AnalyzerTest.java**: 12 tests for analysis strategies
   - Individual strategy tests
   - Strategy composition tests
   - Error handling tests
   - Strategy pattern behavior verification
 
-**Total**: 18 unit tests
+- **AccountTest.java**: 2 tests for account security
+  - Password hashing with BCrypt
+  - Password verification
+
+- **AuthenticationTest.java**: 5 tests for authentication
+  - Token generation
+  - Unique token verification
+  - Error handling
+
+- **UserTest.java**: 2 tests for user operations
+  - User registration
+  - Email validation
+
+**Total**: 63 unit tests + 1 integration test (MVPDemo)
+
+### Running Tests
 
 Run all tests:
 ```bash
@@ -234,8 +268,13 @@ mvn test
 
 Expected output:
 ```
-Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 56, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
+```
+
+Run the MVP demo:
+```bash
+mvn exec:java -Dexec.mainClass="com.ghostwriter.MVPDemo"
 ```
 
 ---
@@ -277,7 +316,6 @@ Additional documentation can be found in the `docs/` directory:
 - **Test Documentation**: Test coverage and strategy pattern testing
 
 ---
-
 
 ## Contact
 
