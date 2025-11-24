@@ -1,0 +1,248 @@
+@startuml GhostWriter_Class_Diagram
+!pragma layout smetana
+
+class User {
+  - userId: String
+  - username: String
+  - email: String
+  - password: String
+  - createdDate: Date
+  + register()
+  + login()
+  + uploadConversations()
+  + reviewSummary()
+  + configurePreferences()
+  + monitorActivity()
+}
+
+class Account {
+  - accountId: String
+  - username: String
+  - passwordHash: String
+  - email: String
+  - isActive: Boolean
+  + create()
+  + validate()
+  + update()
+  + deactivate()
+}
+
+class Profile {
+  - profileId: String
+  - userId: String
+  - communicationStyle: String
+  - vocabulary: List<String>
+  - responsePatterns: Map
+  - timingPreferences: Map
+  - confidenceScore: Float
+  + createProfile()
+  + analyzeWritingStyle()
+  + updateStyle()
+  + getPersonalizationData()
+}
+
+class GhostWriterSystem {
+  - systemId: String
+  - version: String
+  - status: String
+  + coordinateOperations()
+  + authenticateUser()
+  + processMessage()
+  + generateResponse()
+  + scheduleDelivery()
+  + createSummary()
+  + maintainSecurity()
+}
+
+class Message {
+  - messageId: String
+  - senderId: String
+  - recipientId: String
+  - content: String
+  - timestamp: DateTime
+  - status: String
+  - platform: String
+  + store()
+  + retrieve()
+  + trackDelivery()
+  + formatContent()
+}
+
+class Response {
+  - responseId: String
+  - messageId: String
+  - content: String
+  - generatedAt: DateTime
+  - scheduledFor: DateTime
+  - status: String
+  - approved: Boolean
+  + generate()
+  + schedule()
+  + send()
+  + trackStatus()
+  + allowModification()
+}
+
+class Conversation {
+  - conversationId: String
+  - participants: List<String>
+  - messages: List<Message>
+  - startDate: DateTime
+  - lastActivity: DateTime
+  + organize()
+  + maintainContext()
+  + archive()
+  + search()
+  + filter()
+}
+
+class AIModel {
+  - modelId: String
+  - version: String
+  - accuracy: Float
+  + processText()
+  + generateResponse()
+  + analyzeSentiment()
+  + learnStyle()
+  + update()
+}
+
+class Analyzer {
+  - analyzerId: String
+  + analyzePattern()
+  + assessSentiment()
+  + parseContent()
+  + matchStyle()
+  + extractTopics()
+}
+
+class Schedule {
+  - scheduleId: String
+  - responseId: String
+  - scheduledTime: DateTime
+  - delayMinutes: Integer
+  - priority: Integer
+  + calculateTiming()
+  + queueMessage()
+  + manageQueue()
+  + handleConflicts()
+}
+
+class Database {
+  - connectionString: String
+  - status: String
+  + store()
+  + retrieve()
+  + update()
+  + delete()
+  + backup()
+  + optimizeQuery()
+}
+
+class Summary {
+  - summaryId: String
+  - userId: String
+  - date: Date
+  - keyTopics: List<String>
+  - actionItems: List<String>
+  - urgentMatters: List<String>
+  + generate()
+  + aggregate()
+  + format()
+  + send()
+}
+
+class Platform {
+  - platformId: String
+  - platformName: String
+  - apiEndpoint: String
+  + connect()
+  + sendMessage()
+  + receiveMessage()
+  + authenticate()
+}
+
+class Administrator {
+  - adminId: String
+  - username: String
+  - permissions: List<String>
+  + monitorSystem()
+  + updateModel()
+  + configureSettings()
+  + handleSupport()
+  + scheduleMaintenance()
+}
+
+class Authentication {
+  - sessionId: String
+  - token: String
+  - expiresAt: DateTime
+  + authenticate()
+  + validate()
+  + generateToken()
+  + logout()
+}
+
+class Backup {
+  - backupId: String
+  - timestamp: DateTime
+  - size: Long
+  - location: String
+  + create()
+  + verify()
+  + restore()
+  + deleteOld()
+}
+
+class Notification {
+  - notificationId: String
+  - userId: String
+  - message: String
+  - type: String
+  - sentAt: DateTime
+  + create()
+  + send()
+  + markRead()
+}
+
+' Relationships
+User "1" -- "1" Account : has
+User "1" -- "1" Profile : has
+User "1" -- "*" Conversation : participates in
+User "1" -- "*" Notification : receives
+
+GhostWriterSystem "1" -- "*" User : manages
+GhostWriterSystem "1" -- "1" AIModel : uses
+GhostWriterSystem "1" -- "1" Database : stores in
+GhostWriterSystem "1" -- "*" Message : processes
+GhostWriterSystem "1" -- "*" Response : generates
+GhostWriterSystem "1" -- "1" Authentication : validates with
+
+Message "1" -- "1" Response : generates
+Message "*" -- "1" Conversation : belongs to
+Message "1" -- "1" Analyzer : analyzed by
+
+Response "1" -- "1" Schedule : scheduled by
+Response "1" -- "1" Platform : sent via
+
+Conversation "*" -- "1" Summary : summarized in
+
+AIModel "1" -- "1" Analyzer : works with
+AIModel "1" -- "1" Profile : uses
+
+Profile "1" -- "1" Analyzer : analyzed by
+
+Database "1" -- "*" Backup : creates
+Database "1" -- "*" Profile : stores
+Database "1" -- "*" Message : stores
+Database "1" -- "*" Conversation : stores
+
+Administrator "1" -- "1" GhostWriterSystem : manages
+Administrator "1" -- "1" AIModel : updates
+Administrator "1" -- "1" Database : manages
+
+Platform "1" -- "*" Message : transmits
+
+Schedule "1" -- "1" Response : manages
+
+@enduml

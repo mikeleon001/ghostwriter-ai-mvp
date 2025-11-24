@@ -1,0 +1,101 @@
+@startuml Daily_Summary_Sequence_Refactored
+participant Timer
+participant GhostWriterSystem
+participant Database <<Singleton>>
+participant Conversation
+participant Analyzer
+participant TopicExtractionStrategy
+participant SentimentAnalysisStrategy
+participant ActionItemStrategy
+participant StatisticsStrategy
+participant AnalysisResult
+participant Summary
+participant Notification
+participant App
+actor User
+
+Timer -> GhostWriterSystem: Trigger at user-defined time
+GhostWriterSystem -> Database: getInstance()
+Database --> GhostWriterSystem: database instance
+GhostWriterSystem -> Database: Request all conversations from day
+Database -> Conversation: Retrieve all conversations
+Conversation --> Database: Return conversations
+Database --> GhostWriterSystem: Conversation data
+
+note over GhostWriterSystem
+  System creates Analyzer with
+  multiple analysis strategies
+end note
+
+GhostWriterSystem -> Analyzer: Create with strategies
+GhostWriterSystem -> Analyzer: analyzeConversation(conversation)
+
+note over Analyzer, StatisticsStrategy
+  **Strategy Pattern in Action**
+  Analyzer delegates to each strategy
+end note
+
+Analyzer -> TopicExtractionStrategy: analyze(conversation)
+TopicExtractionStrategy -> TopicExtractionStrategy: Extract keywords
+TopicExtractionStrategy -> TopicExtractionStrategy: Rank topics
+TopicExtractionStrategy --> Analyzer: Topic results
+
+Analyzer -> SentimentAnalysisStrategy: analyze(conversation)
+SentimentAnalysisStrategy -> SentimentAnalysisStrategy: Analyze sentiment
+SentimentAnalysisStrategy -> SentimentAnalysisStrategy: Calculate overall sentiment
+SentimentAnalysisStrategy --> Analyzer: Sentiment results
+
+Analyzer -> ActionItemStrategy: analyze(conversation)
+ActionItemStrategy -> ActionItemStrategy: Identify tasks
+ActionItemStrategy -> ActionItemStrategy: Find questions
+ActionItemStrategy --> Analyzer: Action item results
+
+Analyzer -> StatisticsStrategy: analyze(conversation)
+StatisticsStrategy -> StatisticsStrategy: Calculate message count
+StatisticsStrategy -> StatisticsStrategy: Analyze time distribution
+StatisticsStrategy --> Analyzer: Statistics results
+
+Analyzer -> AnalysisResult: Create with aggregated results
+AnalysisResult --> Analyzer: Complete analysis
+Analyzer --> GhostWriterSystem: AnalysisResult
+
+GhostWriterSystem -> Summary: generate(analysisResult)
+Summary -> AnalysisResult: getTopics()
+AnalysisResult --> Summary: Topics data
+Summary -> AnalysisResult: getActionItems()
+AnalysisResult --> Summary: Action items
+Summary -> AnalysisResult: getStatistics()
+AnalysisResult --> Summary: Statistics
+
+Summary -> Summary: Create concise summary
+Summary -> Summary: Highlight main points
+Summary -> Summary: Highlight urgent matters
+
+Summary -> Database: getInstance()
+Database --> Summary: database instance
+Summary -> Database: Store summary
+Database --> Summary: Confirm storage
+Summary --> GhostWriterSystem: Summary complete
+
+GhostWriterSystem -> Notification: Create notification
+Notification -> Notification: Prepare notification message
+Notification -> App: Send notification to User's device
+App -> User: Display notification
+
+User -> App: Open app
+App -> Database: getInstance()
+Database --> App: database instance
+App -> Database: Request daily summary
+Database --> App: Return summary
+App -> User: Display daily summary
+User -> User: Review summary
+User -> User: Catch up without reading\nindividual messages
+
+note over Database
+  **Singleton Pattern**
+  All components use same
+  Database instance via
+  getInstance()
+end note
+
+@enduml
