@@ -279,22 +279,6 @@ mvn exec:java -Dexec.mainClass="com.ghostwriter.MVPDemo"
 
 ---
 
-## Design Pattern Benefits Demonstrated
-
-### Singleton Pattern (Database)
-- **Before**: Risk of multiple connections, resource waste
-- **After**: Single, thread-safe connection; consistent state
-
-### Strategy Pattern (Analyzer)
-- **Before**: Monolithic analyzer class; hard to extend or test
-- **After**: Each analysis type is independent; easy to add new strategies
-
-### Factory Pattern (MessageParser)
-- **Before**: Hard-coded parser selection; difficult to add formats
-- **After**: Centralized creation; easy to support SMS, Telegram, etc.
-
----
-
 ## Future Enhancements
 
 While the MVP focuses on daily summaries, the original vision includes:
@@ -327,8 +311,6 @@ Additional documentation can be found in the `docs/` directory:
 ## Acknowledgments
 
 - **Instructor**: Nima Davarpanah
-- **Course**: CS 5800 - Advanced Software Engineering
-- **Institution**: California Polytechnic State University
 
 ---
 
