@@ -2,12 +2,12 @@
 
 ## Project Overview
 
-GhostWriter AI is an intelligent messaging automation system. This repository contains the **Minimum Viable Product (MVP)** focusing on the **Daily Summary Feature** - a functionality that analyzes conversation messages and generates comprehensive daily summaries.
+GhostWriter AI is an intelligent messaging automation system. This repository contains the **Minimum Viable Product (MVP)** focusing on the **Daily Summary Feature** - a functionality that analyzes conversation messages and generates daily summaries.
 
 ### Course Information
 - **Course**: CS 5800 - Advanced Software Engineering
 - **Institution**: California Polytechnic State University
-- **Semester**: Fall 2024
+- **Semester**: Fall 2025
 - **Project**: Startup Implementation & Demo (Part 4)
 
 ---
@@ -278,17 +278,6 @@ Additional documentation can be found in the `docs/` directory:
 
 ---
 
-## Academic Integrity Statement
-
-This project was completed as part of CS 5800 coursework at Cal Poly. All team members contributed according to the documented distribution. The code demonstrates understanding of software design patterns, object-oriented principles, and professional development practices.
-
----
-
-## License
-
-This project is submitted as academic coursework for CS 5800, Fall 2024.
-
----
 
 ## Contact
 
@@ -299,10 +288,10 @@ This project is submitted as academic coursework for CS 5800, Fall 2024.
 
 ## Acknowledgments
 
-- **Instructor**: [Course Instructor Name]
+- **Instructor**: Nima Davarpanah
 - **Course**: CS 5800 - Advanced Software Engineering
 - **Institution**: California Polytechnic State University
 
 ---
 
-*Last Updated: November 2024*
+*Last Updated: November 2025*
