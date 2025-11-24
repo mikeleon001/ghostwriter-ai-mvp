@@ -2,6 +2,10 @@ package com.ghostwriter.analysis;
 
 import java.util.*;
 
+/**
+ * AnalysisResult - Data class holding conversation analysis results
+ * Used by Strategy pattern to return analysis data
+ */
 public class AnalysisResult {
     
     private List<String> topics;
@@ -17,7 +21,7 @@ public class AnalysisResult {
         this.statistics = new HashMap<>();
     }
     
-    // FIXED: Full constructor with all 4 parameters
+    // Full constructor with all 4 parameters
     public AnalysisResult(List<String> topics, List<String> actionItems, 
                          List<String> pendingQuestions, Map<String, Object> statistics) {
         this.topics = topics != null ? topics : new ArrayList<>();
@@ -36,6 +40,12 @@ public class AnalysisResult {
     }
     
     public List<String> getPendingQuestions() {
+        return pendingQuestions;
+    }
+    
+    // Alias for Strategy pattern compatibility
+    // Allows both getQuestions() and getPendingQuestions()
+    public List<String> getQuestions() {
         return pendingQuestions;
     }
     
