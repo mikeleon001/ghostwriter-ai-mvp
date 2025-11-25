@@ -1,5 +1,7 @@
 # GhostWriter AI - MVP (Daily Summary Feature)
 
+**Watch the complete demo:** [GhostWriter AI MVP Demo on YouTube](https://youtu.be/rM1Lz7srhOI) ```
+
 ## Project Overview
 
 GhostWriter AI is an intelligent messaging automation system. This repository contains the **Minimum Viable Product (MVP)** focusing on the **Daily Summary Feature** - a functionality that analyzes conversation messages and generates daily summaries.
