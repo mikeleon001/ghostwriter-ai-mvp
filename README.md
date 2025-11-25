@@ -1,6 +1,7 @@
 # GhostWriter AI - MVP (Daily Summary Feature)
 
-**Watch the complete demo:** [GhostWriter AI MVP Demo on YouTube](https://youtu.be/rM1Lz7srhOI) ```
+**Watch the complete demo:** [GhostWriter AI MVP Demo on YouTube](https://youtu.be/rM1Lz7srhOI) [![Video Thumbnail Alt Text](https://img.youtube.com/vi/rM1Lz7srhOI/0.jpg)](https://www.youtube.com/watch?v=rM1Lz7srhOI)
+
 
 ## Project Overview
 
