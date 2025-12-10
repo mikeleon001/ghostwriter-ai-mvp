@@ -4,6 +4,8 @@ package com.ghostwriter.analysis;
 
 import com.ghostwriter.database.Database;
 
+import com.ghostwriter.notification.SummaryObserver;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -21,6 +23,7 @@ public class Summary {
     private List<String> actionItems;
     private List<String> pendingQuestions;
     private Map<String, Object> statistics;
+    private List<SummaryObserver> observers;
     private String summaryText;
     private Date createdAt;
 
@@ -30,6 +33,7 @@ public class Summary {
         this.actionItems = new ArrayList<>();
         this.pendingQuestions = new ArrayList<>();
         this.statistics = new HashMap<>();
+        this.observers = new ArrayList<>();
         this.createdAt = new Date();
     }
 
@@ -45,6 +49,7 @@ public class Summary {
         this.actionItems = actionItems;
         this.pendingQuestions = pendingQuestions;
         this.statistics = statistics;
+        this.observers = new ArrayList<>();
         this.createdAt = new Date();
     }
 
@@ -152,6 +157,46 @@ public class Summary {
     }
 
     /**
+     * Register an observer to be notified when this summary is generated.
+     * Part of Observer design pattern implementation.
+     *
+     * @param observer The observer to register
+     */
+    public void addObserver(SummaryObserver observer) {
+        if (observer == null) {
+            throw new IllegalArgumentException("Observer cannot be null");
+        }
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
+    /**
+     * Unregister an observer so it no longer receives notifications.
+     * Part of Observer design pattern implementation.
+     *
+     * @param observer The observer to unregister
+     */
+    public void removeObserver(SummaryObserver observer) {
+        observers.remove(observer);
+    }
+
+    /**
+     * Notify all registered observers that this summary has been generated.
+     * Part of Observer design pattern implementation.
+     */
+    private void notifyObservers() {
+        for (SummaryObserver observer : observers) {
+            try {
+                observer.onSummaryGenerated(this);
+            } catch (Exception e) {
+                // Log error but don't fail if one observer has an issue
+                System.err.println("Error notifying observer: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Save summary to database
      */
     public void saveSummary() {
@@ -177,6 +222,8 @@ public class Summary {
         db.store("summaries", data);
 
         System.out.println("💾 Summary saved to database");
+
+        notifyObservers();
     }
 
     /**
