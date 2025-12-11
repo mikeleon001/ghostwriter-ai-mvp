@@ -1,0 +1,165 @@
+@startuml GhostWriter_Class_Diagram_Part1_Compact
+
+title GhostWriter AI - Part 1: Class Diagram (5 Design Patterns)
+caption Mihail Chitorog (50%), Trung Nghia Vong (25%), Jack River Morris (25%)
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam noteFontSize 9
+skinparam defaultFontSize 10
+skinparam wrapWidth 150
+
+' ============================================
+' PATTERN 1: SINGLETON
+' ============================================
+package "Pattern 1: Singleton" #LightBlue {
+    class Database <<Singleton>> {
+        - {static} instance: Database
+        --
+        + {static} getInstance(): Database
+        + store(table, data)
+        + query(sql, params)
+    }
+}
+
+' ============================================
+' PATTERN 2: STRATEGY
+' ============================================
+package "Pattern 2: Strategy" #LightGreen {
+    interface AnalysisStrategy <<interface>> {
+        + analyze(conv): AnalysisResult
+        + getStrategyName(): String
+    }
+
+    class Analyzer <<Context>> {
+        - strategies: List
+        --
+        + addStrategy(s)
+        + analyzeConversation(conv)
+    }
+
+    class TopicExtractionStrategy
+    class ActionItemStrategy
+    class QuestionDetectionStrategy  
+    class StatisticsStrategy
+
+    AnalysisStrategy <|.. TopicExtractionStrategy
+    AnalysisStrategy <|.. ActionItemStrategy
+    AnalysisStrategy <|.. QuestionDetectionStrategy
+    AnalysisStrategy <|.. StatisticsStrategy
+    Analyzer o--> "1..*" AnalysisStrategy
+}
+
+' ============================================
+' PATTERN 3: FACTORY METHOD
+' ============================================
+package "Pattern 3: Factory Method" #LightYellow {
+    interface MessageParser <<interface>> {
+        + parse(content): List<Message>
+    }
+
+    class MessageParserFactory <<Factory>> {
+        + {static} getParser(type): MessageParser
+        + {static} getDefaultParser()
+    }
+
+    class WhatsAppParser {
+        + parse(content): List<Message>
+    }
+
+    MessageParser <|.. WhatsAppParser
+    MessageParserFactory ..> MessageParser : creates
+}
+
+' ============================================
+' PATTERN 4: OBSERVER
+' ============================================
+package "Pattern 4: Observer" #LightPink {
+    interface SummaryObserver <<interface>> {
+        + onSummaryGenerated(s)
+    }
+
+    class Summary <<Subject>> {
+        - observers: List
+        --
+        + addObserver(o)
+        + removeObserver(o)
+        - notifyObservers()
+        + saveSummary()
+    }
+
+    class ConsoleNotifier
+    class EmailNotifier
+    class LogFileNotifier
+
+    SummaryObserver <|.. ConsoleNotifier
+    SummaryObserver <|.. EmailNotifier
+    SummaryObserver <|.. LogFileNotifier
+    Summary o--> "*" SummaryObserver : notifies
+}
+
+' ============================================
+' PATTERN 5: DECORATOR
+' ============================================
+package "Pattern 5: Decorator" #LightCyan {
+    interface SummaryFormatter <<interface>> {
+        + format(s): String
+    }
+
+    class PlainTextFormatter <<Component>> {
+        + format(s): String
+    }
+
+    abstract class SummaryFormatterDecorator <<Decorator>> {
+        # wrapped: SummaryFormatter
+        --
+        + format(s): String
+    }
+
+    class MarkdownDecorator
+    class HTMLDecorator
+    class JSONDecorator
+
+    SummaryFormatter <|.. PlainTextFormatter
+    SummaryFormatter <|.. SummaryFormatterDecorator
+    SummaryFormatterDecorator <|-- MarkdownDecorator
+    SummaryFormatterDecorator <|-- HTMLDecorator
+    SummaryFormatterDecorator <|-- JSONDecorator
+    SummaryFormatterDecorator o--> SummaryFormatter : wraps
+}
+
+' ============================================
+' CORE CLASSES (Minimal)
+' ============================================
+package "Core Classes" #White {
+    class User {
+        - userId, username, email
+        + register(), login()
+    }
+
+    class Message {
+        - messageId, content
+        - sender, timestamp
+    }
+
+    class Conversation {
+        - messages: List<Message>
+        + addMessage(m)
+        + save()
+    }
+
+    class AnalysisResult {
+        - topics, actionItems
+        - questions, statistics
+    }
+}
+
+' Key relationships
+Conversation *-- Message
+Analyzer --> AnalysisResult : creates
+Summary --> AnalysisResult : uses
+MessageParserFactory ..> Message : creates
+Database <-- Summary : persists
+Database <-- Conversation : persists
+
+@enduml
