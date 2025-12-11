@@ -1,0 +1,85 @@
+@startuml GhostWriter_Activity_Diagram_Part1_Compact
+
+title GhostWriter AI - Part 1: Activity Diagram (5 Design Patterns)
+caption Mihail Chitorog (50%), Trung Nghia Vong (25%), Jack River Morris (25%)
+
+skinparam ActivityFontSize 11
+skinparam noteFontSize 9
+skinparam defaultFontSize 10
+
+start
+
+:User Opens App;
+
+#LightBlue:Get Database Instance;
+note right
+  **Pattern 1: SINGLETON**
+  Database.getInstance()
+end note
+
+:User Uploads File;
+
+#LightYellow:Get Parser from Factory;
+note right
+  **Pattern 3: FACTORY**
+  MessageParserFactory
+  .getParser("whatsapp")
+end note
+
+if (Valid Format?) then (yes)
+  :Parse Messages;
+else (no)
+  :Show Error;
+  stop
+endif
+
+:Create Conversation;
+:Save to Database;
+
+#LightGreen:Run Analysis Strategies;
+note right
+  **Pattern 2: STRATEGY**
+  - TopicExtraction
+  - ActionItem
+  - QuestionDetection
+  - Statistics
+end note
+
+:Combine Results;
+
+#LightPink:Generate Summary;
+note right
+  **Pattern 4: OBSERVER**
+  Notify:
+  - ConsoleNotifier
+  - LogFileNotifier
+end note
+
+:Save Summary;
+:Notify Observers;
+
+:User Requests Export;
+
+#LightCyan:Apply Format Decorator;
+note right
+  **Pattern 5: DECORATOR**
+  HTMLDecorator wraps
+  PlainTextFormatter
+end note
+
+:Export Formatted Summary;
+
+:User Views Summary;
+
+stop
+
+legend right
+  |= # |= Pattern |= Class |
+  | 1 | Singleton | Database |
+  | 2 | Strategy | Analyzer |
+  | 3 | Factory | MessageParserFactory |
+  | 4 | Observer | Summary |
+  | 5 | Decorator | SummaryFormatter |
+endlegend
+
+@enduml

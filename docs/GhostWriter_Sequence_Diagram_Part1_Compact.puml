@@ -1,0 +1,73 @@
+@startuml GhostWriter_Sequence_Diagram_Part1_Compact
+
+title GhostWriter AI - Part 1: Sequence Diagram (5 Design Patterns)
+caption Mihail Chitorog (50%), Trung Nghia Vong (25%), Jack River Morris (25%)
+
+skinparam sequenceMessageAlign center
+skinparam noteFontSize 9
+skinparam defaultFontSize 10
+skinparam participantFontSize 10
+
+actor User
+participant "App" as App
+participant "Database\n<<Singleton>>" as DB
+participant "ParserFactory\n<<Factory>>" as Factory
+participant "Analyzer\n<<Strategy>>" as Analyzer
+participant "Summary\n<<Subject>>" as Summary
+participant "Formatter\n<<Decorator>>" as Formatter
+
+== Pattern 1: Singleton - Database Access ==
+
+User -> App: Upload conversation file
+App -> DB: getInstance()
+note right #LightBlue: **SINGLETON**\nSingle instance
+DB --> App: database instance
+
+== Pattern 3: Factory Method - Create Parser ==
+
+App -> Factory: getParser("whatsapp")
+note right #LightYellow: **FACTORY**\nCreates parser
+Factory --> App: WhatsAppParser
+App -> App: parser.parse(content)
+App --> App: List<Message>
+
+== Store Conversation ==
+
+App -> App: Create Conversation
+App -> DB: store(conversation)
+DB --> App: confirmed
+
+== Pattern 2: Strategy - Analysis ==
+
+App -> Analyzer: analyzeConversation(conv)
+note right #LightGreen: **STRATEGY**\n4 strategies run
+activate Analyzer
+Analyzer -> Analyzer: TopicExtractionStrategy
+Analyzer -> Analyzer: ActionItemStrategy
+Analyzer -> Analyzer: QuestionDetectionStrategy
+Analyzer -> Analyzer: StatisticsStrategy
+Analyzer --> App: AnalysisResult
+deactivate Analyzer
+
+== Pattern 4: Observer - Generate Summary ==
+
+App -> Summary: generate(analysisResult)
+activate Summary
+App -> Summary: addObserver(consoleNotifier)
+App -> Summary: addObserver(logNotifier)
+Summary -> DB: store(summary)
+Summary -> Summary: notifyObservers()
+note right #LightPink: **OBSERVER**\nNotifies all observers
+Summary --> App: Summary
+deactivate Summary
+
+== Pattern 5: Decorator - Export ==
+
+User -> App: Request HTML export
+App -> Formatter: new HTMLDecorator(\n  new PlainTextFormatter())
+note right #LightCyan: **DECORATOR**\nWraps formatter
+App -> Formatter: format(summary)
+Formatter --> App: HTML output
+App --> User: Display summary
+
+@enduml
