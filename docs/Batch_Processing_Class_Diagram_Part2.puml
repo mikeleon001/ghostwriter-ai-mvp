@@ -1,0 +1,132 @@
+@startuml Batch_Processing_Class_Diagram_Part2
+
+title Part 2 - Feature 2: Batch Processing (Class Diagram)
+caption Batch Upload & Reports - Mihail Chitorog (50%)
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam noteFontSize 9
+skinparam defaultFontSize 10
+
+package "Batch Processing Feature" #LightGreen {
+    
+    class BatchResult {
+        - batchId: String
+        - totalFiles: int
+        - successCount: int
+        - failureCount: int
+        - processedFiles: List<String>
+        - failedFiles: Map<String, String>
+        - summariesGenerated: List<Summary>
+        - startTime: long
+        - endTime: long
+        --
+        + addSuccess(filename, summary)
+        + addFailure(filename, reason)
+        + isSuccess(): boolean
+        + getSuccessRate(): double
+        + getDuration(): long
+        + formatResult(): String
+    }
+    
+    class BatchProcessor {
+        - userId: String
+        - parserFactory: MessageParserFactory
+        - analyzer: Analyzer
+        --
+        + processFiles(files: List<File>): BatchResult
+        - processSingleFile(file: File): Summary
+        - validateFile(file: File): boolean
+        - extractDateFromFile(file: File): String
+    }
+    
+    class WeeklyReport {
+        - reportId: String
+        - userId: String
+        - startDate, endDate: String
+        - summaries: List<Summary>
+        - totalMessages: int
+        - topTopics: List<String>
+        - allActionItems: List<String>
+        - mostActiveDay: String
+        --
+        + {static} generate(userId, endDate): WeeklyReport
+        - loadSummaries(): void
+        - aggregateStatistics(): void
+        + formatReport(): String
+        + saveReport(): void
+    }
+    
+    class MonthlyReport {
+        - reportId: String
+        - userId: String
+        - month: int
+        - startDate, endDate: String
+        - totalMessages: int
+        - weeklyBreakdown: Map<Integer, Integer>
+        - topTopics: List<String>
+        - averageMessagesPerDay: double
+        --
+        + {static} generate(userId, year, month): MonthlyReport
+        - loadSummaries(): void
+        - calculateWeeklyBreakdown(): void
+        - identifyTrends(): void
+        + formatReport(): String
+        + saveReport(): void
+    }
+}
+
+package "Reused from Part 1" #LightBlue {
+    class Database <<Singleton>> {
+        + {static} getInstance()
+        + store(), query()
+    }
+    
+    class MessageParserFactory <<Factory>> {
+        + {static} getParser(type)
+    }
+    
+    class Analyzer <<Strategy>> {
+        + analyzeConversation(conv)
+    }
+    
+    class Summary {
+        - keyTopics, actionItems
+        + generate()
+    }
+}
+
+' Relationships
+BatchProcessor --> BatchResult : creates
+BatchProcessor --> MessageParserFactory : uses
+BatchProcessor --> Analyzer : uses
+BatchProcessor --> Summary : generates
+BatchProcessor --> Database : stores via
+
+WeeklyReport --> Database : queries
+WeeklyReport o--> "*" Summary : aggregates
+WeeklyReport --> Database : saves to
+
+MonthlyReport --> Database : queries
+MonthlyReport o--> "*" Summary : aggregates
+MonthlyReport --> Database : saves to
+
+note bottom of BatchProcessor
+  Reuses patterns from Part 1:
+  • Factory (MessageParserFactory)
+  • Strategy (Analyzer)
+  • Singleton (Database)
+end note
+
+legend right
+  **Feature 2: Batch Processing**
+  
+  Capabilities:
+  • Upload multiple files at once
+  • Track success/failure per file
+  • Generate Weekly Reports (7 days)
+  • Generate Monthly Reports (30 days)
+  • Trend analysis
+endlegend
+
+@enduml

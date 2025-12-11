@@ -1,0 +1,86 @@
+@startuml Export_Feature_Sequence_Diagram_Part2
+
+title Part 2 - Feature 1: Export Feature (Sequence Diagram)
+caption Multi-format Summary Export - Mihail Chitorog (50%)
+
+skinparam sequenceMessageAlign center
+skinparam noteFontSize 9
+skinparam defaultFontSize 10
+skinparam participantFontSize 10
+
+actor User
+participant "App" as App
+participant "Summary" as Summary
+participant "PlainTextFormatter\n<<Component>>" as Plain
+participant "HTMLDecorator\n<<Decorator>>" as HTML
+participant "SummaryExporter" as Exporter
+
+== User Requests HTML Export ==
+
+User -> App: Request summary export (HTML)
+
+App -> Summary: getSummary(date)
+Summary --> App: Summary object
+
+== Create Decorated Formatter ==
+
+App -> Plain: new PlainTextFormatter()
+Plain --> App: plainFormatter
+
+App -> HTML: new HTMLDecorator(plainFormatter)
+note right #LightCyan
+  **Decorator Pattern**
+  HTMLDecorator wraps
+  PlainTextFormatter
+end note
+HTML --> App: htmlFormatter
+
+== Export with Decorator ==
+
+App -> Exporter: export(summary, htmlFormatter)
+activate Exporter
+
+Exporter -> HTML: format(summary)
+activate HTML
+
+HTML -> Plain: format(summary)
+note right: Get base text first
+activate Plain
+Plain --> HTML: plain text content
+deactivate Plain
+
+HTML -> HTML: convertToHTML(text)
+note right
+  Adds HTML tags:
+  <html>, <body>,
+  <h1>, <ul>, etc.
+end note
+
+HTML --> Exporter: HTML formatted string
+deactivate HTML
+
+Exporter --> App: formatted output
+deactivate Exporter
+
+App --> User: Display/Download\nHTML summary
+
+== Alternative: JSON Export ==
+
+User -> App: Request JSON export
+
+App -> Plain: new PlainTextFormatter()
+App -> App: new JSONDecorator(plainFormatter)
+App -> Exporter: export(summary, jsonFormatter)
+Exporter --> App: JSON formatted string
+App --> User: Download JSON file
+
+legend right
+  **Supported Export Formats**
+  |= Format |= Decorator |
+  | Plain Text | PlainTextFormatter |
+  | Markdown | MarkdownDecorator |
+  | HTML | HTMLDecorator |
+  | JSON | JSONDecorator |
+endlegend
+
+@enduml

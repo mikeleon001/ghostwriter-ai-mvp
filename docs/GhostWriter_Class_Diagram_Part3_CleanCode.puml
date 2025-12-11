@@ -1,0 +1,230 @@
+@startuml GhostWriter_AI_Part3_CleanCode_Class_Diagram
+
+title GhostWriter AI - Part 3: Clean Code Refactoring\nClass Diagram (New Classes & Builder Patterns)
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam class {
+    BackgroundColor<<new>> LightGreen
+    BackgroundColor<<builder>> LightBlue
+    BackgroundColor<<existing>> White
+}
+
+' ============================================
+' LEGEND
+' ============================================
+legend right
+  |= Color |= Meaning |
+  | <#LightGreen> | New Utility Class (Part 3) |
+  | <#LightBlue> | New Builder Pattern (Part 3) |
+  | <#White> | Existing Class (Updated) |
+endlegend
+
+' ============================================
+' NEW UTILITY CLASSES (Part 3)
+' ============================================
+package "analysis" {
+    class StatisticsKeys <<new>> {
+        {static} +TOTAL_MESSAGES : String
+        {static} +AVG_MESSAGE_LENGTH : String
+        {static} +MOST_ACTIVE : String
+        {static} +SENDER_BREAKDOWN : String
+        {static} +MOST_ACTIVE_DAY : String
+        {static} +PEAK_HOUR : String
+        {static} +DAY_OF_WEEK_ACTIVITY : String
+        {static} +QUESTION_COUNT : String
+        {static} +ACTION_ITEMS_COUNT : String
+        {static} +TOP_TOPICS : String
+        --
+        -StatisticsKeys()
+    }
+    
+    class Summary <<existing>> {
+        -summaryId : String
+        -userId : String
+        -conversationId : String
+        -date : String
+        -keyTopics : List<String>
+        -actionItems : List<String>
+        -pendingQuestions : List<String>
+        -statistics : Map<String, Object>
+        --
+        +formatSummary() : String
+        -appendHeader(sb) : void
+        -appendKeyTopics(sb) : void
+        -appendActionItems(sb) : void
+        -appendPendingQuestions(sb) : void
+        -appendStatisticsSection(sb) : void
+        -appendSenderBreakdown(sb) : void
+        -appendFooter(sb) : void
+    }
+    
+    class "Summary.Builder" as SummaryBuilder <<builder>> {
+        -summaryId : String
+        -userId : String
+        -conversationId : String
+        -date : String
+        -keyTopics : List<String>
+        -actionItems : List<String>
+        -pendingQuestions : List<String>
+        -statistics : Map<String, Object>
+        --
+        +Builder(userId, conversationId, date)
+        +summaryId(id) : Builder
+        +keyTopics(topics) : Builder
+        +actionItems(items) : Builder
+        +pendingQuestions(questions) : Builder
+        +statistics(stats) : Builder
+        +build() : Summary
+    }
+}
+
+package "database" {
+    class DatabaseColumns <<new>> {
+        {static} +USER_ID : String
+        {static} +USERNAME : String
+        {static} +EMAIL : String
+        {static} +CREATED_DATE : String
+        {static} +ACCOUNT_ID : String
+        {static} +PASSWORD_HASH : String
+        {static} +IS_ACTIVE : String
+        {static} +CONVERSATION_ID : String
+        {static} +MESSAGE_ID : String
+        {static} +CONTENT : String
+        {static} +SENDER : String
+        {static} +TIMESTAMP : String
+        {static} +SUMMARY_ID : String
+        ... (30+ constants)
+        --
+        -DatabaseColumns()
+    }
+}
+
+package "batch" {
+    class ReportUtils <<new>> {
+        {static} +HEADER_LINE : String
+        {static} +SECTION_LINE : String
+        --
+        -ReportUtils()
+        {static} +getMessageCount(summary) : int
+        {static} +findTopTopics(frequency, limit) : List<String>
+        {static} +findMaxEntry(counts) : String
+        {static} +getMaxCount(counts) : int
+    }
+    
+    class WeeklyReport <<existing>> {
+        Uses ReportUtils for formatting
+    }
+    
+    class MonthlyReport <<existing>> {
+        Uses ReportUtils for formatting
+    }
+}
+
+package "user" {
+    class Account <<existing>> {
+        -accountId : String
+        -userId : String
+        -username : String
+        -passwordHash : String
+        -email : String
+        -isActive : boolean
+        --
+        +isValid() : boolean
+    }
+    
+    class "Account.Builder" as AccountBuilder <<builder>> {
+        -accountId : String
+        -userId : String
+        -username : String
+        -passwordHash : String
+        -email : String
+        -isActive : boolean
+        --
+        +Builder(userId, username)
+        +accountId(id) : Builder
+        +passwordHash(hash) : Builder
+        +email(email) : Builder
+        +isActive(active) : Builder
+        +build() : Account
+    }
+    
+    class User <<existing>> {
+        -userId : String
+        -username : String
+        -email : String
+        -createdDate : String
+    }
+    
+    class "User.Builder" as UserBuilder <<builder>> {
+        -userId : String
+        -username : String
+        -email : String
+        -createdDate : String
+        --
+        +Builder(username)
+        +userId(id) : Builder
+        +email(email) : Builder
+        +createdDate(date) : Builder
+        +build() : User
+    }
+}
+
+package "message" {
+    class Message <<existing>> {
+        -messageId : String
+        -content : String
+        -sender : String
+        -timestamp : String
+    }
+    
+    class "Message.Builder" as MessageBuilder <<builder>> {
+        -messageId : String
+        -content : String
+        -sender : String
+        -timestamp : String
+        --
+        +Builder(content, sender)
+        +messageId(id) : Builder
+        +timestamp(ts) : Builder
+        +build() : Message
+    }
+}
+
+' ============================================
+' RELATIONSHIPS
+' ============================================
+
+' Builder relationships (inner classes)
+Summary +-- SummaryBuilder : creates >
+Account +-- AccountBuilder : creates >
+User +-- UserBuilder : creates >
+Message +-- MessageBuilder : creates >
+
+' Utility class usage
+Summary ..> StatisticsKeys : uses
+WeeklyReport ..> ReportUtils : uses
+MonthlyReport ..> ReportUtils : uses
+WeeklyReport ..> StatisticsKeys : uses
+MonthlyReport ..> StatisticsKeys : uses
+
+' Note about Clean Code
+note bottom of ReportUtils
+  **Clean Code: DRY Principle**
+  Eliminates duplicate code between
+  WeeklyReport and MonthlyReport
+end note
+
+note bottom of SummaryBuilder
+  **Clean Code: Builder Pattern**
+  Reduces constructor parameters
+  from 8 to 3 required
+end note
+
+note bottom of StatisticsKeys
+  **Clean Code: Constants**
+  Eliminates magic strings
+  throughout codebase
+end note
+
+@enduml

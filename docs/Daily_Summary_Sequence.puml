@@ -1,0 +1,45 @@
+@startuml Daily_Summary_Sequence
+participant Timer
+participant GhostWriterSystem
+participant Database
+participant Conversation
+participant Analyzer
+participant Summary
+participant Notification
+participant App
+actor User
+
+Timer -> GhostWriterSystem: Trigger at user-defined time
+GhostWriterSystem -> Database: Request all conversations from day
+Database -> Conversation: Retrieve all conversations
+Conversation --> Database: Return conversations
+Database --> GhostWriterSystem: Conversation data
+
+GhostWriterSystem -> Analyzer: Analyze all messages
+Analyzer -> Analyzer: Analyze message content
+Analyzer -> Analyzer: Identify key topics
+Analyzer -> Analyzer: Identify important information
+Analyzer -> Analyzer: Identify action items
+Analyzer --> GhostWriterSystem: Analysis results
+
+GhostWriterSystem -> Summary: Generate summary
+Summary -> Summary: Create concise summary
+Summary -> Summary: Highlight main points
+Summary -> Summary: Highlight urgent matters
+Summary -> Database: Store summary
+Database --> Summary: Confirm storage
+Summary --> GhostWriterSystem: Summary complete
+
+GhostWriterSystem -> Notification: Create notification
+Notification -> Notification: Prepare notification message
+Notification -> App: Send notification to User's device
+App -> User: Display notification
+
+User -> App: Open app
+App -> Database: Request daily summary
+Database --> App: Return summary
+App -> User: Display daily summary
+User -> User: Review summary
+User -> User: Catch up without reading\nindividual messages
+
+@enduml

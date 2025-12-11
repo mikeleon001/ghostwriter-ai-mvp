@@ -1,0 +1,16 @@
+# Compiled files
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+
+# macOS files
+.DS_Store
+
+# Database (will be recreated)
+ghostwriter.db
+
+# Log files
+*.log

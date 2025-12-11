@@ -1,0 +1,108 @@
+@startuml Batch_Processing_Sequence_Diagram_Part2
+
+title Part 2 - Feature 2: Batch Processing (Sequence Diagram)
+caption Batch Upload & Reports - Mihail Chitorog (50%)
+
+skinparam sequenceMessageAlign center
+skinparam noteFontSize 9
+skinparam defaultFontSize 10
+skinparam participantFontSize 10
+
+actor User
+participant "App" as App
+participant "BatchProcessor" as Processor
+participant "BatchResult" as Result
+participant "Database\n<<Singleton>>" as DB
+participant "WeeklyReport" as Weekly
+participant "MonthlyReport" as Monthly
+
+== Batch File Upload ==
+
+User -> App: Upload multiple files\n(file1.txt, file2.txt, file3.txt)
+
+App -> Processor: new BatchProcessor(userId)
+App -> Processor: processFiles(fileList)
+activate Processor
+
+Processor -> Result: new BatchResult()
+activate Result
+
+loop for each file
+    Processor -> Processor: validateFile(file)
+    
+    alt valid file
+        Processor -> Processor: processSingleFile(file)
+        note right
+          Uses Factory Pattern
+          to get parser, then
+          Strategy Pattern
+          to analyze
+        end note
+        Processor -> Result: addSuccess(filename, summary)
+    else invalid file
+        Processor -> Result: addFailure(filename, reason)
+    end
+end
+
+Processor -> Result: markComplete()
+Result --> Processor: BatchResult
+deactivate Result
+
+Processor --> App: BatchResult
+deactivate Processor
+
+App --> User: Show results:\n"3 files processed\n2 success, 1 failed"
+
+== Generate Weekly Report ==
+
+User -> App: Request Weekly Report
+
+App -> Weekly: generate(userId, endDate)
+activate Weekly
+
+Weekly -> DB: getInstance()
+Weekly -> DB: query summaries (7 days)
+DB --> Weekly: List<Summary>
+
+Weekly -> Weekly: aggregateStatistics()
+Weekly -> Weekly: findTopTopics()
+
+Weekly -> DB: store(report)
+DB --> Weekly: confirmed
+
+Weekly --> App: WeeklyReport
+deactivate Weekly
+
+App --> User: Display Weekly Report
+
+== Generate Monthly Report ==
+
+User -> App: Request Monthly Report
+
+App -> Monthly: generate(userId, 2025, 12)
+activate Monthly
+
+Monthly -> DB: query summaries (30 days)
+DB --> Monthly: List<Summary>
+
+Monthly -> Monthly: calculateWeeklyBreakdown()
+Monthly -> Monthly: identifyTrends()
+
+Monthly -> DB: store(report)
+Monthly --> App: MonthlyReport
+deactivate Monthly
+
+App --> User: Display Monthly Report\nwith trends
+
+legend right
+  **Batch Processing Flow**
+  
+  1. Upload multiple files
+  2. Process each file
+  3. Track success/failure
+  4. Generate reports:
+     • Weekly (7 days)
+     • Monthly (30 days)
+endlegend
+
+@enduml
