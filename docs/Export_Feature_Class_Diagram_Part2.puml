@@ -1,0 +1,103 @@
+@startuml Export_Feature_Class_Diagram_Part2
+
+title Part 2 - Feature 1: Export Feature (Class Diagram)
+caption Multi-format Summary Export - Mihail Chitorog (50%)
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam noteFontSize 9
+skinparam defaultFontSize 10
+
+package "Export Feature" #LightCyan {
+    
+    interface SummaryFormatter <<interface>> {
+        + format(summary: Summary): String
+        + getFormatName(): String
+    }
+    
+    class PlainTextFormatter <<Component>> {
+        + format(summary: Summary): String
+        + getFormatName(): String
+    }
+    
+    abstract class SummaryFormatterDecorator <<Decorator>> {
+        # wrapped: SummaryFormatter
+        --
+        + SummaryFormatterDecorator(f: SummaryFormatter)
+        + format(summary: Summary): String
+        + getFormatName(): String
+    }
+    
+    class MarkdownDecorator {
+        + format(summary: Summary): String
+        + getFormatName(): String
+        - convertToMarkdown(text: String): String
+    }
+    
+    class HTMLDecorator {
+        + format(summary: Summary): String
+        + getFormatName(): String
+        - convertToHTML(text: String): String
+    }
+    
+    class JSONDecorator {
+        + format(summary: Summary): String
+        + getFormatName(): String
+        - buildJSON(summary: Summary): String
+    }
+    
+    class SummaryExporter <<Utility>> {
+        + {static} export(s: Summary, f: SummaryFormatter): String
+        + {static} exportToFile(s: Summary, f: SummaryFormatter, path: String): void
+    }
+}
+
+package "Core Classes" #White {
+    class Summary {
+        - summaryId: String
+        - keyTopics: List<String>
+        - actionItems: List<String>
+        - statistics: Map
+        --
+        + formatSummary(): String
+        + getKeyTopics(): List
+        + getActionItems(): List
+        + getStatistics(): Map
+    }
+}
+
+' Relationships
+SummaryFormatter <|.. PlainTextFormatter
+SummaryFormatter <|.. SummaryFormatterDecorator
+SummaryFormatterDecorator <|-- MarkdownDecorator
+SummaryFormatterDecorator <|-- HTMLDecorator
+SummaryFormatterDecorator <|-- JSONDecorator
+SummaryFormatterDecorator o--> SummaryFormatter : wraps
+
+SummaryExporter ..> SummaryFormatter : uses
+SummaryExporter ..> Summary : exports
+
+note bottom of SummaryFormatterDecorator
+  **Decorator Pattern**
+  Adds formatting behavior
+  dynamically at runtime.
+  
+  Example:
+  new HTMLDecorator(
+    new PlainTextFormatter())
+end note
+
+legend right
+  **Feature 1: Export**
+  
+  Supported Formats:
+  • Plain Text
+  • Markdown (.md)
+  • HTML (.html)
+  • JSON (.json)
+  
+  Uses Decorator Pattern
+  from Part 1
+endlegend
+
+@enduml
